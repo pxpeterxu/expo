@@ -87,17 +87,41 @@ public class ImageManipulatorModule extends ExportedModule {
   }
 
   private Bitmap resizeBitmap(Bitmap bitmap, ActionResize resize) {
-    float imageRatio = (float) bitmap.getWidth() / bitmap.getHeight();
-    int requestedWidth = resize.getWidth() != 0
-        ? resize.getWidth()
-        : resize.getHeight() != 0
-          ? (int) (resize.getHeight() * imageRatio)
-          : 0;
-    int requestedHeight = resize.getHeight() != 0
-        ? resize.getHeight()
-        : resize.getWidth() != 0
-          ? (int) (resize.getWidth() / imageRatio)
-          : 0;
+    float imageWidth = (float) bitmap.getWidth();
+    float imageHeight = (float) bitmap.imageHeight();
+    float imageRatio = imageWidth / imageHeight;
+
+    int requestedWidth = resize.getWidth();
+    int requestdHeight = resize.getHeight();
+
+    String mode = resize.getMode();
+
+    if (requestedWidth != 0 && requestedHeight != 0) {
+      boolean isContain = mode.equals("contain");
+      boolean isCover = mode.equals("cover");
+
+      if (isContain || isCover) {
+        float widthScale = requestedWidth / imageWidth;
+        float heightScale = requestedHeight / imageHeight;
+        float actualScale = isContain ?
+          Math.min(Math.min(widthScale, heightScale), 1) :
+          Math.max(widthScale, heightScale);
+
+        requestedWidth = (int) Math.round(actualScale * imageWidth);
+        requestedHeight = (int) Math.round(actualScale * imageHeight);
+      }
+    } else {
+      requestedWidth = resize.getWidth() != 0
+          ? resize.getWidth()
+          : resize.getHeight() != 0
+            ? (int) (resize.getHeight() * imageRatio)
+            : 0;
+      requestedHeight = resize.getHeight() != 0
+          ? resize.getHeight()
+          : resize.getWidth() != 0
+            ? (int) (resize.getWidth() / imageRatio)
+            : 0;
+    }
     return Bitmap.createScaledBitmap(bitmap, requestedWidth, requestedHeight, true);
   }
 

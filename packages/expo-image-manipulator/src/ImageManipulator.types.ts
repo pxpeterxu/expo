@@ -9,8 +9,15 @@ export type ActionResize = {
   resize: {
     width?: number;
     height?: number;
+    mode?: string;
   };
 };
+
+export enum ResizeMode {
+  Stretch = 'stretch',
+  Cover = 'cover',
+  Contain = 'contain',
+}
 
 export type ActionRotate = {
   rotate: number;

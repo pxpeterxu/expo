@@ -277,13 +277,38 @@ UM_EXPORT_METHOD_AS(manipulateAsync,
   NSInteger requestedWidth = 0;
   NSInteger requestedHeight = 0;
 
-  if (resize[@"width"]) {
-    requestedWidth = [(NSNumber *)resize[@"width"] integerValue];
-    requestedHeight = requestedWidth / imageRatio;
+  NSString *resizeMode = "stretch";
+
+  if (resize[@"mode"]) {
+    resizeMode = resize["@mode"]
   }
-  if (resize[@"height"]) {
+
+  if (resize[@"width"] && resize["@height"]) {
+    requestedWidth = [(NSNumber *)resize[@"width"] integerValue];
     requestedHeight = [(NSNumber *)resize[@"height"] integerValue];
-    requestedWidth = requestedWidth == 0 ? imageRatio * requestedHeight : requestedWidth;
+
+    bool isContain = [resizeMode isEqualToString:@"contain"];
+    bool isCover = [resizeMode isEqualToString:@"cover"];
+
+    if (isContain || isCover) {
+      float widthScale = requestedWidth / imageWidth;
+      float heightScale = requestedHeight / imageHeight;
+      float actualScale = isContain ?
+        MIN(MIN(widthScale, heightScale), 1) :
+        MAX(widthScale, heightScale);
+
+      requestedWidth = (int) roundf(actualScale * imageWidth);
+      requestedHeight = (int) roundf(actualScale * imageHeight);
+    }
+  } else {
+    if (resize[@"width"]) {
+      requestedWidth = [(NSNumber *)resize[@"width"] integerValue];
+      requestedHeight = requestedWidth / imageRatio;
+    }
+    if (resize[@"height"]) {
+      requestedHeight = [(NSNumber *)resize[@"height"] integerValue];
+      requestedWidth = requestedWidth == 0 ? imageRatio * requestedHeight : requestedWidth;
+    }
   }
 
   CGSize requestedSize = CGSizeMake(requestedWidth, requestedHeight);

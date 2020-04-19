@@ -9,15 +9,18 @@ public class ActionResize {
 
   private static final String KEY_WIDTH = "width";
   private static final String KEY_HEIGHT = "height";
+  private static final String KEY_MODE = "mode";
 
   @NonNull
   private final Integer mWidth;
   @NonNull
   private final Integer mHeight;
+  private final ActionResizeMode mMode;
 
-  private ActionResize(@NonNull Integer width, @NonNull Integer height) {
+  private ActionResize(@NonNull Integer width, @NonNull Integer height, ActionResizeMode mode) {
     mWidth = width;
     mHeight = height;
+    mMode = mode;
   }
 
   static ActionResize fromObject(Object options) {
@@ -42,7 +45,12 @@ public class ActionResize {
       height = ((Double) optionsMap.get(KEY_HEIGHT)).intValue();
     }
 
-    return new ActionResize(width, height);
+    ActionResizeMode mode = ActionResizeMode.fromObject("stretech");
+    if (optionsMap.containsKey(KEY_MODE)) {
+      mode = ActionResizeMode.fromObject(options.get(KEY_MODE));
+    }
+
+    return new ActionResize(width, height, mode);
   }
 
   @NonNull
@@ -53,5 +61,9 @@ public class ActionResize {
   @NonNull
   public Integer getHeight() {
     return mHeight;
+  }
+
+  public String getMode() {
+    return mMode.getMode();
   }
 }
